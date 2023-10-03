@@ -1,0 +1,26 @@
+.task_group {
+  width: 100%;
+  .item{
+    .item_input {
+      display: grid;
+      grid-template-columns: 5fr 1fr;
+      grid-template-areas: 'i b';
+      gap: 20px;
+      margin-bottom: 10px;
+      .input{
+        width: 100%;
+        grid-area: i;
+      }
+      .button{
+        grid-area: b;
+      }
+    }
+    .item_output{
+      .input{
+        width: 100%;
+      }
+    }
+    margin-bottom: 15px;
+  }
+
+}
