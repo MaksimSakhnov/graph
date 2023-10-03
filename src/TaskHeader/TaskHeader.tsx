@@ -6,7 +6,7 @@ export function TaskHeader({content,type}: TaskHeaderProps){
 
 
     return(
-        <Typography variant={type === 'taskHeader' ? 'h3' : 'h6'}>
+        <Typography variant={type === 'taskHeader' ? 'h4' : 'h6'}>
             {content}
         </Typography>
     )

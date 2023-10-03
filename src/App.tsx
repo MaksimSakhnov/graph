@@ -91,6 +91,7 @@ function App() {
     }
 
     const edges = graph.current.getEdges()
+    console.log(edges)
 
 
     function onGraphTypeChange(type: string) {
@@ -310,6 +311,7 @@ function App() {
                         <TableHead>
                             <TableRow>
                                 <TableCell>id</TableCell>
+                                <TableCell>Метка</TableCell>
                                 <TableCell align="right">Смежные вершины</TableCell>
                             </TableRow>
                         </TableHead>
@@ -324,10 +326,11 @@ function App() {
                                         >
                                             <TableCell component="th" scope="row">
                                                 {el.id}
-                                            </TableCell>
+                                            </TableCell><TableCell component="th" scope="row">
+                                            {el.name}
+                                        </TableCell>
                                             <TableCell component="th" scope="row">
-                                                {values.map(value => `${value}, `)}
-
+                                                {values.map(value => `${graph.current.getVertexName(value)}, `)}
                                             </TableCell>
 
                                         </TableRow>
@@ -341,7 +344,8 @@ function App() {
 
             </div>
 
-            <TaskOne graph={graph} vertex={vertex} setVertex={setVertex}/>
+            <TaskOne graph={graph} vertex={vertex} setVertex={setVertex} setShouldRerender={setShouldRerender}
+                     shouldRerender={shouldRerender}/>
         </div>
 
     );
