@@ -8,58 +8,8 @@ import {VertexType} from "../graph/graph";
 
 export function TaskOne({graph, vertex, setVertex, shouldRerender, setShouldRerender}: TaskOneProps) {
 
-    const [ex1SelectedVertex, ex1SetSelectedVertex] = useState<null | number>(null)
-    const [ex1Result, setEx1Result] = useState<null | Array<number>>(null)
-
-    function on1ExClick() {
-        if (ex1SelectedVertex) {
-            const res = graph.current.getExitingVertexes(ex1SelectedVertex)
-            if (res)
-                setEx1Result(res)
-            ex1SetSelectedVertex(null)
-        } else
-            alert('Выберите вершину')
-    }
 
 
-    function getEx1ResultString() {
-        if (ex1Result && ex1Result.length > 0) {
-            let res = ''
-            ex1Result.forEach(el => res += el + ', ')
-            return res
-        } else {
-            return 'Нет данных'
-        }
-    }
-
-    const [ex2SelectedVertex, ex2SetSelectedVertex] = useState<null | number>(null)
-    const [ex2Result, setEx2Result] = useState<null | number>(null)
-
-
-    function onEx2Click() {
-        if (ex2SelectedVertex) {
-            setEx2Result(graph.current.getHalfExodus(ex2SelectedVertex))
-            ex2SetSelectedVertex(null)
-        } else
-            alert('Выберите вершину')
-
-    }
-
-    const [ex3Result, setEx3Result] = useState<null | Array<{ name: string, id: number, count: number }>>(null)
-
-    function onEx3Click() {
-        setEx3Result(graph.current.getDegreesForAllVertexes())
-    }
-
-    function getEx3ResultString() {
-        let result = ''
-        if (ex3Result) {
-            ex3Result.forEach(el => {
-                result += el.name + ': ' + el.count + ', '
-            })
-        }
-        return result
-    }
 
 
     const [ex4SelectedVertex, setEx4SelectedVertex] = useState<null | number>(null)
@@ -71,7 +21,7 @@ export function TaskOne({graph, vertex, setVertex, shouldRerender, setShouldRere
             const result = graph.current.getHalfApproach(ex4SelectedVertex)
             if (result)
                 setEx4Result(result)
-            ex2SetSelectedVertex(null)
+            setEx4SelectedVertex(null)
         } else
             alert('Выберите вершину')
 
@@ -128,80 +78,98 @@ export function TaskOne({graph, vertex, setVertex, shouldRerender, setShouldRere
         })
     }
 
-    function onUnionGraphClick(){
-        if(file1Json &&  file2Json){
-            const newGraph =  graph.current.createFromUnion(file1Json, file2Json)
-            if(newGraph){
-                graph.current = newGraph
-                setShouldRerender(true)
-                setFile1Json(null)
-                setFile2Json(null)
+    function onUnionGraphClick() {
+        // if(file1Json &&  file2Json){
+        //     const newGraph =  graph.current.createFromUnion(file1Json, file2Json)
+        //     if(newGraph){
+        //         graph.current = newGraph
+        //         setShouldRerender(true)
+        //         setFile1Json(null)
+        //         setFile2Json(null)
+        //     }
+        // }
+        // else {
+        //     alert('Загрузите файл')
+        // }
+        console.log('onUnionClick')
+    }
+
+
+    const [findComposesResult, setFindComposesResult] = useState<Array<Array<number>>>([[]])
+
+    function onFindCompClick() {
+        setFindComposesResult(graph.current.findComposes())
+    }
+
+    function getFindCompResultString() {
+        let result = ''
+        findComposesResult.forEach(el => {
+            result += `[${el}],`
+        })
+        return result
+    }
+
+
+    const [ex28SelectedVertex, setEx28SelectedVertex] = useState<null | number>(null)
+    const [ex28Result, setEx28Result] = useState<null | Map<number, number>>(null)
+
+    function onGetShortestPathsClick() {
+        if (ex28SelectedVertex) {
+            setEx28Result(graph.current.getShortestPaths(ex28SelectedVertex))
+        } else {
+            alert('выберите вершину!')
+        }
+        setEx28SelectedVertex(null)
+    }
+
+    function getEx28ResultString() {
+        let result = ''
+        if (ex28Result) {
+            ex28Result.forEach((el, key) => {
+                result += `[${graph.current.getVertexName(key)}: ${el === Number.MAX_SAFE_INTEGER ? '∞' : el}]`
+            })
+        }
+        return result
+    }
+
+
+    const [ex9aSelectedVertex1, setEx9aSelectedVertex1] = useState<number | null>(null)
+    const [ex9aSelectedVertex2, setEx9aSelectedVertex2] = useState<number | null>(null)
+    const [ex9MaxWeight, setEx9MaxWeight] = useState<number | null>(null)
+    const [ex9aResult, setEx9aResult] = useState<null | Map<number, number>>(null)
+
+
+    function getEx9aResult() {
+        if (ex9aSelectedVertex1 && ex9aSelectedVertex2 && ex9MaxWeight) {
+            setEx9aResult(graph.current.getShortestPaths(ex9aSelectedVertex1, {
+                maxWeight: ex9MaxWeight,
+                from: ex9aSelectedVertex1,
+                to: ex9aSelectedVertex2
+            }))
+        } else {
+            alert('Введены не все данные!')
+        }
+    }
+
+    function getEx9aResultString(){
+        if(ex9aSelectedVertex2 && ex9aResult && ex9MaxWeight){
+
+            const toWeight = ex9aResult?.get(ex9aSelectedVertex2)
+            if(toWeight && toWeight <= ex9MaxWeight){
+                return `Да, минимальное расстояние = ${toWeight}`
+            }
+            else {
+                return 'Нет'
             }
         }
-        else {
-            alert('Загрузите файл')
-        }
+        return ''
+
     }
 
 
     return (
         <div className={styles.task_group}>
             <TaskHeader content={'2. Список смежности Ia'} type={'taskHeader'}/>
-            {/*<div className={styles.item}>
-                <TaskHeader content={'1) Для данной вершины орграфа вывести все «выходящие» соседние вершины.'}
-                            type={'exHeader'}/>
-
-                <div className={styles.item_input}>
-                    <Select value={ex1SelectedVertex} sx={{width: '100%'}} className={styles.input}
-                            onChange={e => ex1SetSelectedVertex(Number(e.target.value))}>
-                        {vertex.map(el => <MenuItem value={el.id}>{el.name}</MenuItem>)}
-                    </Select>
-                    <Button className={styles.button} variant={'contained'} onClick={on1ExClick}>Выполнить</Button>
-                </div>
-                <div className={styles.item_output}>
-                    <TextField className={styles.input} value={getEx1ResultString()} disabled={true}/>
-
-                </div>
-
-            </div>
-
-
-            <div className={styles.item}>
-                <TaskHeader content={'2) Вывести  полустепень исхода данной вершины орграфа.'}
-                            type={'exHeader'}/>
-
-                <div className={styles.item_input}>
-                    <Select value={ex2SelectedVertex} sx={{width: '100%'}} className={styles.input}
-                            onChange={e => ex2SetSelectedVertex(Number(e.target.value))}>
-                        {vertex.map(el => <MenuItem value={el.id}>{el.name}</MenuItem>)}
-                    </Select>
-                    <Button className={styles.button} variant={'contained'} onClick={onEx2Click}>Выполнить</Button>
-                </div>
-                <div className={styles.item_output}>
-                    <TextField className={styles.input} value={ex2Result !== -1 ? ex2Result : 'NONE'} disabled={true}/>
-
-                </div>
-
-            </div>*/}
-
-
-            {/*<div className={styles.item}>
-                <TaskHeader content={'3) Для каждой вершины графа вывести её степень.'}
-                            type={'exHeader'}/>
-
-                <div className={styles.item_input}>
-                    <Select sx={{width: '100%'}} className={styles.input} disabled={true}
-                    >
-                        {vertex.map(el => <MenuItem value={el.id}>{el.name}</MenuItem>)}
-                    </Select>
-                    <Button className={styles.button} variant={'contained'} onClick={onEx3Click}>Выполнить</Button>
-                </div>
-                <div className={styles.item_output}>
-                    <TextField className={styles.input} value={getEx3ResultString()} disabled={true}/>
-
-                </div>
-
-            </div>*/}
 
 
             <div className={styles.item}>
@@ -209,7 +177,7 @@ export function TaskOne({graph, vertex, setVertex, shouldRerender, setShouldRere
                             type={'exHeader'}/>
 
                 <div className={styles.item_input}>
-                    <Select sx={{width: '100%'}} className={styles.input} disabled={true}
+                    <Select sx={{width: '100%'}} className={styles.input}
                             onChange={e => setEx4SelectedVertex(Number(e.target.value))}
                     >
                         {vertex.map(el => <MenuItem value={el.id}>{el.name}</MenuItem>)}
@@ -281,10 +249,96 @@ export function TaskOne({graph, vertex, setVertex, shouldRerender, setShouldRere
 
                     </div>
 
-                    <Button className={styles.button} variant={'contained'} onClick={onUnionGraphClick}>Выполнить</Button>
+                    <Button className={styles.button} variant={'contained'}
+                            onClick={onUnionGraphClick}>Выполнить</Button>
                 </div>
                 <div className={styles.item_output}>
                     <TextField className={styles.input} disabled={true}/>
+                </div>
+
+            </div>
+
+
+            <TaskHeader content={'5. Обходы графа II'} type={'taskHeader'}/>
+
+            <div className={styles.item}>
+                <TaskHeader content={'6) Найти связные компоненты графа.'}
+                            type={'exHeader'}/>
+
+                <div className={styles.item_input}>
+                    <Button className={styles.button} variant={'contained'} onClick={onFindCompClick}>Выполнить</Button>
+
+                </div>
+
+
+                <div className={styles.item_output}>
+                    <TextField className={styles.input} disabled={true} value={getFindCompResultString()}/>
+                </div>
+
+            </div>
+
+
+            <TaskHeader content={'5. Обходы графа II'} type={'taskHeader'}/>
+
+            <div className={styles.item}>
+                <TaskHeader content={'28) Вывести кратчайшие (по числу дуг) пути из вершины u во все остальные.'}
+                            type={'exHeader'}/>
+
+                <div className={styles.item_input}>
+                    <Select sx={{width: '100%'}} className={styles.input}
+                            onChange={e => setEx28SelectedVertex(Number(e.target.value))}
+                    >
+                        {vertex.map(el => <MenuItem value={el.id}>{el.name}</MenuItem>)}
+                    </Select>
+                    <Button className={styles.button} variant={'contained'}
+                            onClick={onGetShortestPathsClick}>Выполнить</Button>
+
+                </div>
+
+
+                <div className={styles.item_output}>
+                    <TextField className={styles.input} disabled={true} value={getEx28ResultString()}/>
+                </div>
+
+            </div>
+
+
+            <TaskHeader content={'8. Веса IV а'} type={'taskHeader'}/>
+
+            <div className={styles.item}>
+                <TaskHeader
+                    content={'1) Определить, существует ли путь длиной не более L между двумя заданными вершинами графа.(дейкстра)'}
+                    type={'exHeader'}/>
+
+
+
+                <div className={styles.item_input}>
+                    <div className={styles.input}>
+                        <Select sx={{width: '100%'}} className={styles.input}
+                                onChange={e => setEx9aSelectedVertex1(Number(e.target.value))}
+                        >
+                            {vertex.map(el => <MenuItem value={el.id}>{el.name}</MenuItem>)}
+                        </Select>
+                        <Select sx={{width: '100%'}} className={styles.input}
+                                onChange={e => setEx9aSelectedVertex2(Number(e.target.value))}
+                        >
+                            {vertex.map(el => <MenuItem value={el.id}>{el.name}</MenuItem>)}
+                        </Select>
+                        <TextField  className={styles.input} id="outlined-basic" variant="outlined" inputProps={{style: {padding: '2%'}}}
+                                   value={ex9MaxWeight ?? ''} type={'number'}
+                                   onChange={e => setEx9MaxWeight(Number(e.target.value))}/>
+
+
+                    </div>
+
+                    <Button className={styles.button} variant={'contained'}
+                            onClick={getEx9aResult}>Выполнить</Button>
+                </div>
+
+
+
+                <div className={styles.item_output}>
+                    <TextField className={styles.input} disabled={true} value={getEx9aResultString()}/>
                 </div>
 
             </div>

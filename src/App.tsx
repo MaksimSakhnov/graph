@@ -19,12 +19,14 @@ function App() {
 
     const [shouldRerender, setShouldRerender] = useState(true)
     const [vertex, setVertex] = useState<VertexType[]>([]);
+    const [weightType, setWeightType] = useState<boolean>(false)
     const graph = useRef(new Graph())
 
     useEffect(() => {
         if (shouldRerender) {
             const vertex = Array.from(graph.current.getVertex().values())
             setVertex(vertex)
+            setWeightType(graph.current.getWeightType())
         }
         setShouldRerender(false)
 
@@ -48,15 +50,17 @@ function App() {
 
     const [createEdge1, setCreateEdge1] = useState<number | null>(null)
     const [createEdge2, setCreateEdge2] = useState<number | null>(null)
+    const [createWeight, setCreateWeight] = useState<null | number>(null)
 
     function onCreateEdgeClick() {
         if (createEdge1 && createEdge2) {
-            graph.current.addEdge({from: createEdge1, to: createEdge2})
+            graph.current.addEdge({from: createEdge1, to: createEdge2, weight: createWeight})
         } else {
             alert('Введите все данные')
         }
         setCreateEdge1(null)
         setCreateEdge2(null)
+        setCreateWeight(null)
         setShouldRerender(true)
 
     }
@@ -64,15 +68,17 @@ function App() {
 
     const [deleteEdge1, setDeleteEdge1] = useState<number | null>(null)
     const [deleteEdge2, setDeleteEdge2] = useState<number | null>(null)
+    const [deleteWeight, setDeleteWeight] = useState<null | number>(null)
 
     function onDeleteEdgeClick() {
-        if (deleteEdge1 && deleteEdge2) {
-            graph.current.deleteEdge({from: deleteEdge1, to: deleteEdge2})
+        if ((deleteEdge1 && deleteEdge2 && !weightType) || (deleteWeight && weightType && deleteEdge2 && deleteEdge1)) {
+            graph.current.deleteEdge({from: deleteEdge1, to: deleteEdge2, weight: deleteWeight})
         } else {
             alert('Введите все данные')
         }
         setDeleteEdge1(null)
         setDeleteEdge2(null)
+        setDeleteWeight(null)
         setShouldRerender(true)
 
     }
@@ -96,6 +102,12 @@ function App() {
 
     function onGraphTypeChange(type: string) {
         graph.current.changeType(type as 'direction' | 'nonDirection')
+        setShouldRerender(true)
+    }
+
+    function onGraphWeightChangeType(type: boolean){
+        debugger
+        graph.current.changeWeightType(type)
         setShouldRerender(true)
     }
 
@@ -179,6 +191,17 @@ function App() {
                                        onChange={e => setCreateEdge2(Number(e.target.value))}/>
 
                         </div>
+                        {weightType &&
+                            <div className={styles.input}>
+                                <label htmlFor="input">Вес</label>
+                                <TextField id="outlined-basic" variant="outlined" inputProps={{style: {padding: '2%'}}}
+                                           value={createWeight ?? ''} type={'number'}
+                                           onChange={e => setCreateWeight(Number(e.target.value))}/>
+
+                            </div>
+
+                        }
+
 
                         <div className={styles.buttons}>
                             <button onClick={() => onCreateEdgeClick()}>Добавить</button>
@@ -205,6 +228,17 @@ function App() {
                                        value={deleteEdge2 ?? ''} type={'number'}
                                        onChange={e => setDeleteEdge2(Number(e.target.value))}/>
                         </div>
+
+                        {weightType &&
+                            <div className={styles.input}>
+                                <label htmlFor="input">Вес</label>
+                                <TextField id="outlined-basic" variant="outlined" inputProps={{style: {padding: '2%'}}}
+                                           value={deleteWeight ?? ''} type={'number'}
+                                           onChange={e => setDeleteWeight(Number(e.target.value))}/>
+
+                            </div>
+
+                        }
 
                         <div className={styles.buttons}>
                             <button onClick={() => onDeleteEdgeClick()}>Удалить</button>
@@ -260,6 +294,30 @@ function App() {
 
                 </div>
 
+
+                <div className={styles.item}>
+                    <label>Изменить тип (взвешенный/невзвешенный)</label>
+                    <div className={styles.item_body}>
+
+                        <div className={styles.input}>
+                            <label htmlFor="input">Тип</label>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                label="Age"
+                                value={weightType ? 1 : 0}
+                                onChange={e => onGraphWeightChangeType(Boolean(e.target.value))}
+                            >
+                                <MenuItem value={0}>Невзвешенный</MenuItem>
+                                <MenuItem value={1}>Взвешенный</MenuItem>
+                            </Select>
+                        </div>
+
+                    </div>
+
+
+                </div>
+
                 <div className={styles.item}>
                     <label></label>
                     <div className={styles.item_body}>
@@ -307,7 +365,7 @@ function App() {
                     </Table>
                 </div>
                 <div className={styles.item}>
-                    <Table sx={{maxWidth: '20%'}} aria-label="simple table">
+                    <Table sx={{maxWidth: '100%'}} aria-label="simple table">
                         <TableHead>
                             <TableRow>
                                 <TableCell>id</TableCell>
@@ -330,7 +388,7 @@ function App() {
                                             {el.name}
                                         </TableCell>
                                             <TableCell component="th" scope="row">
-                                                {values.map(value => `${graph.current.getVertexName(value)}, `)}
+                                                {values.map(value => `[Вершина: ${graph.current.getVertexName(value.vertex)}, Вес: ${value.weight}], `)}
                                             </TableCell>
 
                                         </TableRow>
